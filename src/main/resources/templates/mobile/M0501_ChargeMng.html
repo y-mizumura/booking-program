@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org">
+
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no" />
+<title th:text="#{app_name}">Function Name</title>
+<link rel="stylesheet" type="text/css"
+	href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+<link rel="stylesheet" type="text/css" href="../../static/css/style.css" th:href="@{/css/style.css}" />
+<link rel="stylesheet" type="text/css" href="../../static/css/themes/my-custom-theme.css" th:href="@{/css/themes/my-custom-theme.css}" />
+<link rel="stylesheet" type="text/css" href="../../static/css/themes/jquery.mobile.icons.min.css" th:href="@{/css/themes/jquery.mobile.icons.min.css}" />
+<link rel="apple-touch-icon" href="../../static/favicon.png" th:href="@{/favicon.png}" />
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+<script
+	src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+</head>
+
+<body th:with="loginuser=${#authentication.principal.user}">
+<div data-role="page">
+
+	<!--/* ヘッダー */--> 
+	<div th:replace="mobile/X0000_Layout :: menu"></div>
+	<div th:replace="mobile/X0000_Layout :: header"></div>
+
+	<!--/* メイン */-->
+	<div role="main" class="ui-content">
+		<h3 th:text="#{M0501_func_name}" class="title">Function Name</h3>
+		
+		<script th:inline="javascript">
+		/*<![CDATA[*/
+			<!--/* 処理成功ダイアログ */-->
+			var success_message = /*[[${success_message}]]*/ 'Success Message';
+			if(success_message != null){
+				alert(success_message);
+			}
+		/*]]>*/
+		</script>
+		
+		<!--/* エラーメッセージ */-->
+ 		<div th:text="${top_error}" class="top_error">Error Message</div>
+			 
+ 		<div class="content_m">
+	 		<th:block th:if="${#lists.size(charge_list)}>0">
+		    	<table border="1" width="100%">
+					<thead>
+						<tr>
+							<th><span th:text="#{M0501_code}">Code</span></th>
+							<th><span th:text="#{M0501_name}">Name</span></th>
+							<th><span th:text="#{M0501_charge}">Charge</span></th>
+						</tr>
+					</thead>
+					<tbody class="show-list">
+						<tr th:each="charge_i : ${charge_list}">
+							<td th:text="${charge_i.chargeCd}">Code</td>
+							<td th:text="${charge_i.name}">Name</td>
+							<td th:text="${charge_i.charge}+'円'">Charge</td>
+						</tr>
+					</tbody>
+				</table>
+	 		</th:block>
+			<th:block th:unless="${#lists.size(charge_list)}>0">
+		    	<span th:text="#{M0501_note_no_data}">Note</span>
+		    </th:block>
+		</div>
+		
+		<div data-role="collapsible" data-theme="g" data-collapsed="true">
+			<h3 th:text="#{M0501_label_new_}">New</h3>
+			<form th:object="${M0501_ChargeMngForm}" th:action="@{/M0501}" method="POST">
+				<div class="content_s">
+					<div th:text="#{M0501_code}" class="content_title hissu">Code</div>
+					<div th:text="#{M0501_note_new_code}" class="note">Note</div>
+					<span th:if="${#fields.hasErrors('chargeCd')}" th:errors="*{chargeCd}" class="error">Error Message</span>
+					<input type="text" th:field="*{chargeCd}" maxlength="3"  data-clear-btn="true" data-corners="false"/>
+				</div>
+				<div class="content_s">
+					<div th:text="#{M0501_name}" class="content_title hissu">Name</div>
+					<div th:text="#{M0501_note_new_name}" class="note">Note</div>
+					<span th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="error">Error Message</span>
+					<input type="text" th:field="*{name}" maxlength="10" data-clear-btn="true" data-corners="false"/>
+				</div>
+				<div class="content_s">
+					<div th:text="#{M0501_charge}" class="content_title hissu">Charge</div>
+					<div th:text="#{M0501_note_new_charge}" class="note">Note</div>
+					<span th:if="${#fields.hasErrors('charge')}" th:errors="*{charge}" class="error">Error Message</span>
+					<input type="text" th:field="*{charge}" maxlength="5" data-clear-btn="true" data-corners="false" pattern="[0-9]*"/>
+				</div>
+				<button type="submit" name="register" class="ui-btn ui-btn-g submit-btn" th:text="#{button_register}">Button Name</button>
+			</form>
+		</div>
+		
+		<div data-role="collapsible" data-theme="g" data-collapsed="true">
+			<h3 th:text="#{M0501_label_update}">Update</h3>	
+			<form th:object="${M0501_ChargeMngForm}" th:action="@{/M0501}" method="POST">
+			<div class="content_s">
+				<div th:text="#{M0501_label_update_item}" class="content_title">Label</div>
+				<div th:text="#{M0501_note_update_item}" class="note">Note</div>
+				<div class="select-field">
+					<select id="updateSelect" name="updateSelect">
+						<option th:each="charge_i : ${charge_list}" 
+								th:text="#{M0501_label_entry_fee_list(${charge_i.chargeCd}, ${charge_i.name})}"
+								th:value="${charge_i.chargeCd}" 
+								th:selected="${charge_i.chargeCd}==*{updateSelect}" 
+								th:inline="text">Entry Fee List</option>
+					</select>
+				</div>
+			</div>
+			<div class="content_s">
+				<div th:text="#{M0501_label_update_name}" class="content_title">Label</div>
+				<div th:text="#{M0501_note_update_name}" class="note">Note</div>
+				<span th:if="${#fields.hasErrors('updateName')}" th:errors="*{updateName}" class="error">Error Message</span>
+				<input type="text" th:field="*{updateName}" maxlength="10" data-clear-btn="true" data-corners="false"/>
+			</div>
+			<div class="content_s">
+				<div th:text="#{M0501_label_update_charge}" class="content_title">Label</div>
+				<div th:text="#{M0501_note_update_charge}" class="note">Note</div>
+				<span th:if="${#fields.hasErrors('updateCharge')}" th:errors="*{updateCharge}" class="error">Error Message</span>
+				<input type="text" th:field="*{updateCharge}" maxlength="5" data-clear-btn="true" data-corners="false" pattern="[0-9]*"/>
+			</div>
+			<button type="submit" name="update" class="ui-btn ui-btn-g submit-btn" th:text="#{button_update}">Button Name</button>
+			</form>
+		</div>
+		
+		<div data-role="collapsible" data-theme="g" data-collapsed="true">
+			<h3 th:text="#{M0501_label_delete}">Delete</h3>
+			<form th:object="${M0501_ChargeMngForm}" th:action="@{/M0501}" method="POST">
+			<div class="content_s">
+				<div th:text="#{M0501_label_delete_item}" class="content_title">Label</div>
+				<div th:text="#{M0501_note_delete_item}" class="note">Note</div>
+				<div class="select-field">
+					<select id="deleteSelect" name="deleteSelect">
+						<option th:each="charge_i : ${charge_list}" 
+								th:text="#{M0501_label_entry_fee_list(${charge_i.chargeCd}, ${charge_i.name})}"
+								th:value="${charge_i.chargeCd}" 
+								th:selected="${charge_i.chargeCd}==*{deleteSelect}" 
+								th:inline="text">Entry Fee List</option>
+					</select>
+				</div>
+			</div>
+			<button type="submit" name="delete" class="ui-btn ui-btn-h submit-btn" th:text="#{button_delete}">Button Name</button>
+			</form>
+		</div>
+	</div>
+</div>
+</body>
+</html>

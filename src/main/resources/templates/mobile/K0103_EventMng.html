@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org">
+
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no" />
+<title th:text="#{app_name}">Function Name</title>
+<link rel="stylesheet" type="text/css"
+	href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+<link rel="stylesheet" type="text/css" href="../../static/css/style.css" th:href="@{/css/style.css}" />
+<link rel="stylesheet" type="text/css" href="../../static/css/themes/my-custom-theme.css" th:href="@{/css/themes/my-custom-theme.css}" />
+<link rel="stylesheet" type="text/css" href="../../static/css/themes/jquery.mobile.icons.min.css" th:href="@{/css/themes/jquery.mobile.icons.min.css}" />
+<link rel="apple-touch-icon" href="../../static/favicon.png" th:href="@{/favicon.png}" />
+<link rel="stylesheet" type="text/css" href="../../static/css/toastr.min.css" th:href="@{/css/toastr.min.css}"/>
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+<script
+	src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+<script src="/js/toastr.min.js" th:href="@{/js/toastr.min.js}"></script>
+<script type="text/javascript">
+	$(document).ready(function() {
+		toastr.options = {
+			"positionClass": "toast-top-center",
+			"timeOut": "2000"
+		}
+	});
+</script>
+</head>
+
+<body th:with="loginuser=${#authentication.principal.user}" th:object="${event}">
+<div data-role="page">
+
+	<!--/* ヘッダー */--> 
+	<div th:replace="mobile/X0000_Layout :: menu"></div>
+	<div th:replace="mobile/X0000_Layout :: header"></div>
+
+	<!--/* メイン */-->
+	<div role="main" class="ui-content">
+	
+		<!--/* 機能名 */-->
+		<h3 th:text="#{K0103_func_name}" class="title">Function Name</h3>
+	
+		<script th:inline="javascript">
+		/*<![CDATA[*/
+			<!--/* 処理成功ダイアログ */-->
+			var success_message = /*[[${success_message}]]*/ 'Success Message';
+			if(success_message != null){
+				alert(success_message);
+			}
+			
+			<!--/* 確認ダイアログ */-->
+			function show_confirm(){
+				var message = /*[[#{K0103_confirm_message_calc_entry_fee}]]*/ 'Confirm Message';
+				return confirm(message);;
+			}
+			
+			<!--/* 参加費手動更新 */-->
+			function change_entry_fee(entryId, entryFee){
+				
+				$.ajax('/K0103/changeEntryFee', {
+					type: 'get',
+					dataType: 'json',
+					data: { 
+						entryId : entryId,
+						entryFee : entryFee
+					}
+				})
+				// 通信成功
+				.done(function(json_data) {
+					// 成功メッセージを表示
+					toastr.success(json_data);
+					if ( json_data == "1") {
+						$("#seisanzumi-flg-"+entryId).attr("src", "/images/check.gif");
+					} else {
+						$("#seisanzumi-flg-"+entryId).attr("src", "/images/uncheck.gif");
+					}
+				})
+				// 通信失敗
+				.fail(function() {
+					var alert_message = /*[[#{K0103_alert_communication}]]*/ 'Alert Message';
+					alert(alert_message);
+				});
+			}
+			
+			<!--/* 清算済みフラグ更新 */-->
+			function change_seisanzumi_flg(entryId){
+				$.ajax('/K0103/changeFlg', {
+					type: 'get',
+					dataType: 'json',
+					data: { 
+						entryId : entryId
+					}
+				})
+				// 通信成功
+				.done(function(json_data) {
+					if ( json_data == "1") {
+						$("#seisanzumi-flg-"+entryId).attr("src", "/images/check.gif");
+					} else {
+						$("#seisanzumi-flg-"+entryId).attr("src", "/images/uncheck.gif");
+					}
+				})
+				// 通信失敗
+				.fail(function() {
+					var alert_message = /*[[#{K0103_alert_communication}]]*/ 'Alert Message';
+					alert(alert_message);
+				});
+			}
+			
+		/*]]>*/
+		</script>
+		
+		<!--/* エラーメッセージ */-->
+		<div th:text="${top_error}" class="top_error">Error Message</div>
+		
+		<!--/* イベント情報 */-->
+		<ul data-role="listview" data-inset="true" th:attr="data-theme=*{isActiveEvent()}?'a':'c'">
+			<li data-role="list-divider">
+				<span th:text="*{title}">Event Title</span>
+				<span class="right-justify">
+					<img th:if="*{isUkeEnd()}" src="/images/uke_end.gif" height="20" class="label" />
+				</span>
+			</li>
+			<li class="note">
+				<!--/* イベント情報*/-->
+				<div th:text="#{K0103_event_date(*{#temporals.format(eventDate, 'M/d(E)')}, *{startTime}, *{endTime})}">Event Date</div>
+				<div th:text="#{K0103_event_location(*{location.name})}">Location</div>
+				<div th:if="*{location.access!=null AND location.access!=''}" class="note">
+					<span th:text="#{K0103_event_access}">Access</span>
+					<th:block th:each="str, stat : *{location.access.split('\r\n|\r|\n', -1)}">
+						<span th:text="${str}">Access</span>
+						<th:block th:if="${!stat.last}"><br/>　　　　</th:block>
+					</th:block>
+				</div>
+				<div th:if="*{memo!=null AND memo!=''}" class="note">
+					<span th:text="#{K0103_event_memo}">Memo</span>
+					<th:block th:each="str, stat : *{memo.split('\r\n|\r|\n', -1)}">
+						<span th:text="${str}">Memo</span>
+						<th:block th:if="${!stat.last}"><br/>　　　　</th:block>
+					</th:block>
+				</div>
+			</li>
+		</ul>
+		
+		<!--/* 参加費計算 */-->
+		<div class="content_s">
+			<form th:action="@{'/K0103/submit/' + *{eventId}}" method="GET" data-ajax="false">
+				<button type="submit" name="calcCharge" class="ui-btn ui-btn-g" th:text="#{button_calc_charge}" onclick="return show_confirm();">Button Name</button>
+			</form>
+		</div>
+		
+		<!--/* 参加メンバー */-->
+		<div class="content_s">
+			<ul data-role="listview" data-theme="a" data-inset="true">
+			
+				<!--/* 参加／途中参加 */-->
+				<li th:text="#{K0103_label_entry}" data-role="list-divider">Label</li>
+				<th:block th:if="${#lists.isEmpty(sEntryList)}">
+					<li th:text="#{label_no_member}">No Member</li>
+				</th:block>
+				<th:block th:unless="${#lists.isEmpty(sEntryList)}">
+					<li th:each="sEntry : ${sEntryList}">
+						<div class="ui-grid-list">
+							<div class="ui-block-a">
+								<img th:src="@{'data:image/JPEG;base64,' + ${sEntry.member.getBase64Image()}}" class="member-icon-list"/>
+							</div>
+							<div class="ui-block-b">
+								<a th:href="@{'/C0102/select/event/' + *{eventId} + '/' + ${sEntry.member.memberId}}" th:text="${sEntry.member.name}" class="list-title-join-edit list-link" data-ajax="false">Member Name</a>
+								<div th:if="${sEntry.isEntryKubunT()}"     th:text="#{K0103_label_join_time(${sEntry.entryStartTime}, ${sEntry.entryEndTime})}" class="note">Entry Time</div>
+								<div th:unless="${sEntry.isEntryKubunT()}" th:text="#{K0103_label_join_fulltime}" class="note">Entry Time</div>
+								<div th:if="${sEntry.entryFee==null}"      th:text="#{K0103_label_entry_fee_unset}" class="note highlight">Entry Fee</div>
+								<div th:unless="${sEntry.entryFee==null}" class="note inline">
+									<span th:text="#{K0103_label_entry_fee}">Entry Fee</span>
+									<input type="number" th:attr="onBlur='change_entry_fee('+${sEntry.entryId}+',this.value);'" pattern="\d*" th:value="${sEntry.entryFee}" data-role="none" class="entry-fee"/>
+									<span th:text="#{K0103_label_yen}">Yen</span>
+								</div>
+							</div>
+							<div class="ui-block-c">
+								<th:block th:if="${sEntry.seisanzumiFlg != null}">
+									<a href="#" th:attr="onclick='change_seisanzumi_flg(' + ${sEntry.entryId} + ');'">
+										<img th:id=" 'seisanzumi-flg-' + ${sEntry.entryId}" th:attr="src=${sEntry.seisanzumiFlg==1} ? '/images/check.gif' : '/images/uncheck.gif'" height="30px" class="label" />
+									</a>
+								</th:block>
+							</div>
+						</div>
+					</li>
+				</th:block>
+				
+				<!--/* 不参加 */-->
+				<li th:text="#{K0103_label_no_entry}" data-role="list-divider">Label</li>
+				<th:block th:if="${#lists.isEmpty(fEntryList)}">
+					<li th:text="#{label_no_member}">No Member</li>
+				</th:block>
+				<th:block th:unless="${#lists.isEmpty(fEntryList)}">
+					<li th:each="fEntry : ${fEntryList}">
+						<div class="ui-grid-list">
+							<div class="ui-block-a">
+								<img th:src="@{'data:image/JPEG;base64,' + ${fEntry.member.getBase64Image()}}" class="member-icon-list"/>
+							</div>
+							<div class="ui-block-b">
+								<a th:href="@{'/C0102/select/event/' + *{eventId} + '/' + ${fEntry.member.memberId}}" th:text="${fEntry.member.name}" class="list-title list-link" data-ajax="false">Member Name</a>
+							</div>	
+						</div>
+					</li>
+				</th:block>
+				
+				<!--/* 考え中 */-->
+				<li th:text="#{K0103_label_thinking}" data-role="list-divider">Label</li>
+				<th:block th:if="${#lists.isEmpty(hEntryList)}">
+					<li th:text="#{label_no_member}">No Member</li>
+				</th:block>
+				<th:block th:unless="${#lists.isEmpty(hEntryList)}">
+					<li th:each="hEntry : ${hEntryList}">
+						<div class="ui-grid-list">
+							<div class="ui-block-a">
+								<img th:src="@{'data:image/JPEG;base64,' + ${hEntry.member.getBase64Image()}}" class="member-icon-list"/>
+							</div>
+							<div class="ui-block-b">
+								<a th:href="@{'/C0102/select/event/' + *{eventId} + '/' + ${hEntry.member.memberId}}" th:text="${hEntry.member.name}" class="list-title list-link" data-ajax="false">Member Name</a>
+							</div>	
+						</div>
+					</li>
+				</th:block>
+				
+				<!--/* 未回答 */-->
+				<li th:text="#{K0103_label_no_answer}" data-role="list-divider">Label</li>
+				<th:block th:if="${#lists.isEmpty(mMemberList)}">
+					<li th:text="#{label_no_member}">No Member</li>
+				</th:block>
+				<th:block th:unless="${#lists.isEmpty(mMemberList)}">
+					<li th:each="mMember : ${mMemberList}">
+						<div class="ui-grid-list">
+							<div class="ui-block-a">
+								<img th:src="@{'data:image/JPEG;base64,' + ${mMember.getBase64Image()}}" class="member-icon-list"/>
+							</div>
+							<div class="ui-block-b">
+								<a th:href="@{'/C0102/select/event/' + *{eventId} + '/' + ${mMember.memberId}}" th:text="${mMember.name}" class="list-title list-link" data-ajax="false">Member Name</a>
+							</div>	
+						</div>
+					</li>
+				</th:block>
+				
+			</ul>
+		</div>
+		
+	</div>
+</div>
+
+</body>
+</html>

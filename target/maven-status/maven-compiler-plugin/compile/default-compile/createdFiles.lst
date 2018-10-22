@@ -1,0 +1,8 @@
+latte\LatteApplication.class
+latte\domain\service\LoginUserDetails.class
+latte\domain\service\LoginUserDetailsService.class
+latte\domain\model\Member.class
+latte\domain\repository\MemberRepository.class
+latte\domain\repository\UserRepository.class
+latte\WebSecurityConfig.class
+latte\domain\model\User.class

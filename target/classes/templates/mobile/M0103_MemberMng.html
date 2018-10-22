@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org">
+
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no" />
+<title th:text="#{app_name}">Function Name</title>
+<link rel="stylesheet" type="text/css"
+	href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+<link rel="stylesheet" type="text/css" href="../../static/css/style.css" th:href="@{/css/style.css}" />
+<link rel="stylesheet" type="text/css" href="../../static/css/themes/my-custom-theme.css" th:href="@{/css/themes/my-custom-theme.css}" />
+<link rel="stylesheet" type="text/css" href="../../static/css/themes/jquery.mobile.icons.min.css" th:href="@{/css/themes/jquery.mobile.icons.min.css}" />
+<link rel="apple-touch-icon" href="../../static/favicon.png" th:href="@{/favicon.png}" />
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+<script
+	src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+</head>
+
+<body th:with="loginuser=${#authentication.principal.user}">
+<div data-role="page">
+
+	<!--/* ヘッダー */--> 
+	<div th:replace="mobile/X0000_Layout :: menu"></div>
+	<div th:replace="mobile/X0000_Layout :: header"></div>
+
+	<!--/* メイン */-->
+	<div role="main" class="ui-content">
+		
+		<!--/* 機能名 */-->
+		<h3 th:text="#{M0103_func_name}" class="title">Function Name</h3>
+			
+		<script th:inline="javascript">
+		/*<![CDATA[*/
+			<!--/* 処理成功ダイアログ */-->
+			var success_message = /*[[${success_message}]]*/ 'Success Message';
+			if(success_message != null){
+				alert(success_message);
+			}
+			
+			<!--/* 確認ダイアログ */-->
+			function show_confirm(){
+				var message = /*[[#{M0103_confirm_message_delete_member}]]*/ 'Confirm Message';
+				return confirm(message);;
+			}
+			
+		/*]]>*/
+		</script>
+		
+		<!--/* エラーメッセージ */-->
+ 		<div th:text="${top_error}" class="top_error">Error Message</div>
+
+		<!--/* メンバー情報 */-->
+		<ul data-role="listview" data-inset="true" th:attr="data-theme=${member.sex}==#{male}?'a':'c'">
+			<li data-role="list-divider">
+				<span th:text="${member.name}">Event Title</span>
+			</li>
+			<li class="note">
+				<!--/* 詳細情報 */-->
+				<div th:text="#{M0103_member_sex(${member.sex})}">Member Info1</div>
+				<div th:text="#{M0103_member_position(${member.position})}">Member Info2</div>
+				<div th:text="#{M0103_member_entry_fee(${member.charge})}">Member Info3</div>
+				<th:block th:unless="${member.user==null}">
+					<div th:text="#{M0103_userid(${member.user.userId})}">User Info</div>
+				</th:block>
+				<th:block th:if="${member.user==null}">
+					<div th:text="#{M0103_note_no_userid}" class="highlight">User Info</div>
+				</th:block>
+			</li>
+		</ul>
+		
+		<!--/* メンバー編集 */-->
+		<div class="content_m">
+			<div th:text="#{M0103_label_edit_member}" class="content_title">Label</div>
+			<div class="note" th:text="#{M0103_note_edit_member}">Message1</div>
+			<div class="note" th:text="#{M0103_note_edit_member_info}">Message2</div>
+			<form th:action="@{'/M0102/select/' + ${member.memberId}}" method="GET">
+				<button type="submit" name="edit" class="ui-btn ui-btn-g" th:text="#{M0103_button_update_member}">Button Name</button>
+			</form>
+			<form th:action="@{'/M0103/submit/' + ${member.memberId}}" method="POST">
+				<button type="submit" name="delete" class="ui-btn ui-btn-h" th:text="#{M0103_button_delete_member}" onclick="return show_confirm();">Button Name</button>
+			</form>
+		</div>
+		
+		<!--/* ユーザ編集 */-->
+		<div class="content_m">
+			<div th:text="#{M0103_label_edit_user}" class="content_title">Label</div>
+			<div class="note" th:text="#{M0103_note_edit_user}">Message</div>
+			<form th:action="@{'/M0104/select/' + ${member.memberId}}" method="GET">
+				<button type="submit" name="editUser" class="ui-btn ui-btn-g" th:text="#{M0103_button_update_user}">Button Name</button>
+			</form>
+		</div>
+		
+	</div>
+	
+</div>
+</body>
+</html>

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org">
+
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no" />
+<title th:text="#{app_name}">Function Name</title>
+<link rel="stylesheet" type="text/css"
+	href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+<link rel="stylesheet" type="text/css" href="../../static/css/style.css" th:href="@{/css/style.css}" />
+<link rel="stylesheet" type="text/css" href="../../static/css/themes/my-custom-theme.css" th:href="@{/css/themes/my-custom-theme.css}" />
+<link rel="stylesheet" type="text/css" href="../../static/css/themes/jquery.mobile.icons.min.css" th:href="@{/css/themes/jquery.mobile.icons.min.css}" />
+<link rel="apple-touch-icon" href="../../static/favicon.png" th:href="@{/favicon.png}" />
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+<script
+	src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+</head>
+
+<body th:with="loginuser=${#authentication.principal.user},
+	applyURL=@{'/C0102/submit/' + ${event.eventId}},
+	editURL =@{'/C0102/submit/' + ${event.eventId} + '/' + ${member.memberId}}">
+<div data-role="page">
+
+	<!--/* ヘッダー */--> 
+	<div th:replace="mobile/X0000_Layout :: menu"></div>
+	<div th:replace="mobile/X0000_Layout :: header"></div>
+	
+	<!--/* メイン */-->
+	<div role="main" class="ui-content">
+	
+		<!--/* 機能名 */-->
+		<th:block th:if="${mode=='apply'}">
+			<h3 th:text="#{C0102_func_name_S}" class="title">Function Name</h3>
+		</th:block>
+		<th:block th:if="${mode=='edit'}">
+			<h3 th:text="#{C0102_func_name_O(${member.name})}" class="title">Function Name</h3>
+		</th:block>
+		
+		<!--/* エラーメッセージ */-->
+		<div th:text="${top_error}" class="top_error">Error Message</div>
+		
+		<!--/* イベント／イベント参加情報 */-->
+		<ul data-role="listview" th:object="${event}" data-inset="true" th:attr="data-theme=*{isActiveEvent()}?'a':'c'">
+			<li data-role="list-divider">
+				<span th:text="*{title}">Event Title</span>
+				<span class="right-justify">
+					<img th:if="*{isUkeEnd()}" src="/images/uke_end.gif" height="20" class="label" />
+				</span>
+			</li>
+			<li class="note">
+				<!--/* イベント情報*/-->
+				<div th:text="#{C0102_event_date(*{#temporals.format(eventDate, 'M/d(E)')}, *{startTime}, *{endTime})}">Event Date</div>
+				<div th:text="#{C0102_event_location(*{location.name})}">Location</div>
+				<div th:if="*{location.access!=null AND location.access!=''}" class="note">
+					<span th:text="#{C0102_event_access}">Access</span>
+					<th:block th:each="str, stat : *{location.access.split('\r\n|\r|\n', -1)}">
+						<span th:text="${str}">Access</span>
+						<th:block th:if="${!stat.last}"><br/>　　　　</th:block>
+					</th:block>
+				</div>
+				<div th:if="*{memo!=null AND memo!=''}" class="note">
+					<span th:text="#{C0102_event_memo}">Memo</span>
+					<th:block th:each="str, stat : *{memo.split('\r\n|\r|\n', -1)}">
+						<span th:text="${str}">Memo</span>
+						<th:block th:if="${!stat.last}"><br/>　　　　</th:block>
+					</th:block>
+				</div>
+				<!--/* イベント参加情報 */-->
+				<div th:object="${entry}">
+					<div>
+						<span th:text="#{C0102_entry_info}">Entry Info</span>
+						<span th:if="${entry==null}" th:text="#{label_no_answer}" class="label-no-answer">Label</span>
+						<th:block th:unless="${entry==null}">
+							<span th:if="*{isEntryKubunST()}" th:text="#{label_join}" class="label-join">Label</span>
+							<span th:if="*{isEntryKubunT()}" th:text="#{label_join_time(*{entryStartTime}, *{entryEndTime})}">Entry Time</span>
+							<span th:if="*{isEntryKubunF()}" th:text="#{label_no_join}" class="label-no-join">Label</span>
+							<span th:if="*{isEntryKubunK()}" th:text="#{label_thinking}" class="label-thinking">Label</span>
+						</th:block>
+					</div>
+					<div th:text="#{C0102_entry_fee(*{entryFee})}" th:if="${entry!=null} AND *{isDispEntryFee()}">Entry Fee</div>
+				</div>
+			</li>
+		</ul>
+		
+		<!--/* 出欠フォーム */-->
+		<th:block th:if="${event.isUkeChu() || mode=='edit'}">
+			<div data-role="collapsible" data-theme="g" th:attr="data-collapsed=${mode=='apply'}" >
+				<h3 th:text="#{C0102_label_entry_form}">Entry Form</h3>
+				<form th:object="${C0102_EntryEventForm}" th:action="${mode=='apply' ? applyURL : editURL }" method="POST" data-ajax="false">
+					<div class="content_s">
+						<div th:text="#{C0102_label_entry_kubun}"  class="content_title">Label</div>
+						<span th:if="${#fields.hasErrors('entryKubun')}" th:errors="*{entryKubun}" class="error">Error Message</span>
+						<div class="select-field">
+							<select id="entryKubun" name="entryKubun">
+								<option th:each="entryKubun_i : ${entryKubunList}" 
+										th:text="${entryKubun_i}" 
+										th:value="${entryKubun_i}" 
+										th:selected="${entryKubun_i}==*{entryKubun}" 
+										th:inline="text">Entry Kubun List</option>
+							</select>
+						</div>
+					</div>
+					<div id="entry_time" class="content_s">
+						<div th:text="#{C0102_label_entry_time}" class="content_title">Label</div>
+						<div th:text="#{C0102_note_entry_time}" class="note">Note</div>
+						<span th:if="${#fields.hasErrors('startTime')}" th:errors="*{startTime}" class="error">Error Message</span>
+						<span th:if="${#fields.hasErrors('endTime')}" th:errors="*{endTime}" class="error">Error Message</span>
+						<table width="100%">
+							<tbody>
+								<tr>
+									<td>
+										<select th:field="*{startTime}">
+											<option th:each="time : ${timeList}" th:text="${time}" th:value="${time}">09:00</option>
+										</select>
+									</td>
+									<td>～</td>
+									<td>
+										<select th:field="*{endTime}">
+											<option th:each="time : ${timeList}" th:text="${time}" th:value="${time}">10:00</option>
+										</select>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<th:block th:if="${mode=='apply'}">
+						<button type="submit" name="apply" class="ui-btn ui-btn-g submit-btn" th:text="#{button_confirm}">Button Name</button>
+					</th:block>
+					<th:block th:if="${mode=='edit'}">
+						<button type="submit" name="edit" class="ui-btn ui-btn-g submit-btn" th:text="#{button_edit}">Button Name</button>
+					</th:block>
+				</form>
+			</div>
+			
+			<script src="/js/f_C0102_EntryEvent.js" th:src="@{/js/f_C0102_EntryEvent.js}"></script>
+		
+		</th:block>
+	
+		<!--/* 参加メンバー */-->
+		<div th:if="${mode=='apply'}" data-role="collapsible" data-theme="g" data-collapsed="true">
+			<h3 th:text="#{C0102_label_entry_member}">Entry Member</h3>
+			<ul data-role="listview" data-theme="a" data-inset="false">
+			
+				<!--/* 参加 */-->	
+				<li th:text="#{C0102_label_entry}" data-role="list-divider">Label</li>
+				<th:block th:if="${#lists.isEmpty(sEntryList)}">
+					<li th:text="#{label_no_member}">No Member</li>
+				</th:block>
+				<th:block th:unless="${#lists.isEmpty(sEntryList)}">
+					<li th:each="sEntry : ${sEntryList}">
+						<div class="ui-grid-list">
+							<div class="ui-block-a">
+								<img th:src="@{'data:image/JPEG;base64,' + ${sEntry.member.getBase64Image()}}" class="member-icon-list" />
+							</div>
+							<div class="ui-block-b">
+								<span th:text="${sEntry.member.name}" class="list-title-join" >Member Name</span>
+								<div th:if="${sEntry.isEntryKubunT()}"     th:text="#{C0102_label_join_time(${sEntry.entryStartTime}, ${sEntry.entryEndTime})}" class="note">Entry Time</div>
+								<div th:unless="${sEntry.isEntryKubunT()}" th:text="#{C0102_label_join_fulltime}" class="note">Entry Time</div>
+							</div>	
+						</div>
+					</li>
+				</th:block>
+			
+				<!--/* 不参加 */-->
+				<li th:text="#{C0102_label_no_entry}" data-role="list-divider">Label</li>
+				<th:block th:if="${#lists.isEmpty(fEntryList)}">
+					<li th:text="#{label_no_member}">No Member</li>
+				</th:block>
+				<th:block th:unless="${#lists.isEmpty(fEntryList)}">
+					<li th:each="fEntry : ${fEntryList}">
+						<div class="ui-grid-list">
+							<div class="ui-block-a">
+								<img th:src="@{'data:image/JPEG;base64,' + ${fEntry.member.getBase64Image()}}" class="member-icon-list" />
+							</div>
+							<div class="ui-block-b">
+								<span th:text="${fEntry.member.name}" class="list-title" >Member Name</span>
+							</div>	
+						</div>
+					</li>
+				</th:block>
+				
+				<!--/* 考え中 */-->
+				<li th:text="#{C0102_label_thinking}" data-role="list-divider">Label</li>
+				<th:block th:if="${#lists.isEmpty(hEntryList)}">
+					<li th:text="#{label_no_member}">No Member</li>
+				</th:block>
+				<th:block th:unless="${#lists.isEmpty(hEntryList)}">
+					<li th:each="hEntry : ${hEntryList}">
+						<div class="ui-grid-list">
+							<div class="ui-block-a">
+								<img th:src="@{'data:image/JPEG;base64,' + ${hEntry.member.getBase64Image()}}" class="member-icon-list"/>
+							</div>
+							<div class="ui-block-b">
+								<span th:text="${hEntry.member.name}" class="list-title" >Member Name</span>
+							</div>	
+						</div>
+					</li>
+				</th:block>
+				
+			</ul>
+		</div>
+		
+	</div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org">
+
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no" />
+<title th:text="#{app_name}">Function Name</title>
+<link rel="stylesheet" type="text/css"
+	href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+<link rel="stylesheet" type="text/css" href="../../static/css/style.css" th:href="@{/css/style.css}" />
+<link rel="stylesheet" type="text/css" href="../../static/css/themes/my-custom-theme.css" th:href="@{/css/themes/my-custom-theme.css}" />
+<link rel="stylesheet" type="text/css" href="../../static/css/themes/jquery.mobile.icons.min.css" th:href="@{/css/themes/jquery.mobile.icons.min.css}" />
+<link rel="apple-touch-icon" href="../../static/favicon.png" th:href="@{/favicon.png}" />
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+<script
+	src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+</head>
+
+<body th:with="loginuser=${#authentication.principal.user}">
+<div data-role="page">
+
+	<!--/* ヘッダー */--> 
+	<div th:replace="mobile/X0000_Layout :: menu"></div>
+	<div th:replace="mobile/X0000_Layout :: header"></div>
+
+	<!--/* メイン */-->
+	<div role="main" class="ui-content">
+		<h3 th:text="#{M0101_func_name}" class="title">Function Name</h3>
+
+		<script th:inline="javascript">
+		/*<![CDATA[*/
+			<!--/* 処理成功ダイアログ */-->
+			var success_message = /*[[${success_message}]]*/ 'Success Message';
+			if(success_message != null){
+				alert(success_message);
+			}
+		/*]]>*/
+		</script>
+
+		<div class="content_s">
+		
+			<!--/* 検索 */-->
+			<div class="search-form">
+				<form th:object="${S0001_SearchForm}" th:action="@{'/M0101/search'}" method="GET">
+					<input type="search" th:field="*{keyword}" data-corners="false" th:attr="placeholder=#{M0101_placeholder}"/>
+					<button type="submit" class="ui-btn ui-btn-g hidden-search-btn" id="M0101_search" th:text="#{button_search}">Button Name</button>
+				</form>
+			</div>
+			
+			<!--/* 一覧 */-->
+			<ul data-role="listview" data-inset="true" >
+				<li th:each="member : ${memberList}" data-icon="false">
+					<a th:href="@{'/M0103/select/' + ${member.memberId}}" data-ajax="false">
+						<div class="ui-grid-list">
+							<div class="ui-block-a">
+								<img th:src="@{'data:image/JPEG;base64,' + ${member.getBase64Image()}}" class="member-icon-list"/>
+							</div>
+							<div class="ui-block-b">
+								<span th:text="${member.name}" class="list-title" >Member Name</span>
+							</div>
+						</div>
+					</a>
+				</li>
+			</ul>
+			
+		</div>
+	</div>
+	
+</div>
+</body>
+</html>

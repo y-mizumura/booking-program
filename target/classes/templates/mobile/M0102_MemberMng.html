@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeleaf.org">
+
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0,user-scalable=no" />
+<title th:text="#{app_name}">Function Name</title>
+<link rel="stylesheet" type="text/css"
+	href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+<link rel="stylesheet" type="text/css" href="../../static/css/style.css" th:href="@{/css/style.css}" />
+<link rel="stylesheet" type="text/css" href="../../static/css/themes/my-custom-theme.css" th:href="@{/css/themes/my-custom-theme.css}" />
+<link rel="stylesheet" type="text/css" href="../../static/css/themes/jquery.mobile.icons.min.css" th:href="@{/css/themes/jquery.mobile.icons.min.css}" />
+<link rel="apple-touch-icon" href="../../static/favicon.png" th:href="@{/favicon.png}" />
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+<script
+	src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+</head>
+
+<body th:with="loginuser=${#authentication.principal.user}">
+<div data-role="page">
+
+	<!--/* ヘッダー */--> 
+	<div th:replace="mobile/X0000_Layout :: menu"></div>
+	<div th:replace="mobile/X0000_Layout :: header"></div>
+
+	<!--/* メイン */-->
+	<div role="main" class="ui-content">
+		
+		<!--/* 機能名 */-->
+		<h3 th:text="${memberId==0} ? #{M0102_func_name_N} : #{M0102_func_name_U}" class="title">Function Name</h3>
+			
+		<script th:inline="javascript">
+		/*<![CDATA[*/
+			<!--/* 処理成功ダイアログ */-->
+			var success_message = /*[[${success_message}]]*/ 'Success Message';
+			if(success_message != null){
+				alert(success_message);
+			}
+		/*]]>*/
+		</script>
+		
+		<!--/* エラーメッセージ */-->
+ 		<div th:text="${top_error}" class="top_error">Error Message</div>
+
+		<form th:object="${M0102_MemberMngForm}" th:action="@{'/M0102/submit/' + ${memberId} }" method="POST" data-ajax="false">
+			<div class="content_s">
+				<div th:text="#{M0102_label_name}" class="content_title hissu">Label</div>
+				<div th:text="#{M0102_note_name}" class="note">Note</div>
+				<span th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="error">Error Message</span>
+				<input type="text" th:field="*{name}" maxlength="10" data-clear-btn="true" data-corners="false"/>
+			</div>
+			<div class="content_s">
+				<div th:text="#{M0102_label_sex}" class="content_title hissu">Label</div>
+				<div th:text="#{M0102_note_sex}" class="note">Note</div>
+				<span th:if="${#fields.hasErrors('sex')}" th:errors="*{sex}" class="error">Error Message</span>
+				<fieldset data-role="controlgroup" data-theme="f" data-corners="false" data-type="horizontal" class="no-margin right-align">
+					<label for="male"><span th:text="#{male}">Label</span></label>
+					<input type="radio" name="sex" id="male" th:value="#{male}" data-corners="false" th:checked="*{sex}==#{male}" />
+					<label for="female"><span th:text="#{female}">Label</span></label>
+					<input type="radio" name="sex" id="female" th:value="#{female}" data-corners="false" th:checked="*{sex}==#{female}"/>
+				</fieldset>
+			</div>
+			<div class="content_s">
+				<div th:text="#{M0102_label_position}" class="content_title hissu">Label</div>
+				<div th:text="#{M0102_note_position}" class="note">Note</div>
+				<span th:if="${#fields.hasErrors('position')}" th:errors="*{position}" class="error">Error Message</span>
+				<fieldset data-role="controlgroup" data-theme="f" data-corners="false" data-type="horizontal" class="no-margin right-align">
+					<label for="front"><span th:text="#{front}">Label</span></label>
+					<input type="radio" name="position" id="front" th:value="#{front}" data-corners="false" th:checked="*{position}==#{front}" />
+					<label for="back"><span th:text="#{back}">Label</span></label>
+					<input type="radio" name="position" id="back" th:value="#{back}" data-corners="false" th:checked="*{position}==#{back}" />
+				</fieldset>
+			</div>
+			<div class="content_s">
+				<div th:text="#{M0102_label_entry_fee}" class="content_title hissu">Label</div>
+				<div th:text="#{M0102_note_entry_fee}" class="note">Note</div>
+				<span th:if="${#fields.hasErrors('chargeCd')}" th:errors="*{chargeCd}" class="error">Error Message</span>
+				<div class="select-field">
+					<select id="chargeCd" name="chargeCd">
+						<option th:each="charge_i : ${charge_list}" 
+								th:text="#{M0102_label_entry_fee_list(${charge_i.name}, ${charge_i.charge})}"
+								th:value="${charge_i.chargeCd}" 
+								th:selected="${charge_i.chargeCd}==*{chargeCd}" 
+								th:inline="text">Entry Fee List</option>
+					</select>
+				</div>
+			</div>
+
+			<!--/* 新規作成時 */-->
+			<th:block th:if="${memberId}==0">
+				<button type="submit" name="register" class="ui-btn ui-btn-g submit-btn" th:text="#{button_register}">Button Name</button>
+			</th:block>
+			<!--/* 更新時 */-->
+			<th:block th:unless="${memberId}==0">
+				<div><button type="submit" name="update" class="ui-btn ui-btn-g submit-btn" th:text="#{button_update}">Button Name</button></div>
+			</th:block>
+		</form>
+	</div>
+	
+</div>
+</body>
+</html>
